@@ -124,7 +124,10 @@ $(document).ready(function($) {
     }
 
     function populateDetailsPage() {
-        const info = JSON.parse(localStorage.getItem('seletectedItem'));
+        if (localStorage.getItem('seletectedItem')) {
+            console.log(localStorage.getItem('seletectedItem'))
+            var info = JSON.parse(localStorage.getItem('seletectedItem'));
+        }
         const pathname = window.location.pathname;
         if (info && pathname == '/detail-01.html') {
             $("#ts-map-detail").attr("data-ts-map-center-latitude", info.latitude);
@@ -174,17 +177,21 @@ $(document).ready(function($) {
     populateDetailsPage();
 
     $(".add_cart").on("click", function (e) {
-        console.log('Testing');
-        const info = JSON.parse(localStorage.getItem('seletectedItem'));
-        const idx = e.target.id.split('__')[1];
-        addToCart(info.name, info.medicines[idx].id);
+        console.log('Testing', localStorage.getItem('seletectedItem'));
+        if (localStorage.getItem('seletectedItem') != '') {
+            const info = JSON.parse(localStorage.getItem('seletectedItem'));
+            const idx = e.target.id.split('__')[1];
+            addToCart(info.name, info.medicines[idx].id);
+        }
         window.location.reload();
     })
 
     $(".delete_cart").on("click", function (e) {
-        const info = JSON.parse(localStorage.getItem('seletectedItem'));
-        const idx = e.target.id.split('__')[1];
-        removeFromCart(info.name, info.medicines[idx].id);
+        if (localStorage.getItem('seletectedItem') != '') {
+            const info = JSON.parse(localStorage.getItem('seletectedItem'));
+            const idx = e.target.id.split('__')[1];
+            removeFromCart(info.name, info.medicines[idx].id);
+        }
         window.location.reload();
     })
 
@@ -290,19 +297,20 @@ $(document).ready(function($) {
             loadedMarkersData = allMarkersData.map(shop => {
                 const shopTemp = {...shop, medicines: [...shop.medicines]}
                 shopTemp.medicines = shopTemp.medicines.filter(medicine => medicine.name.toLowerCase().match(searchText.toLowerCase()) != null)
+                shopTemp.nomeds = shopTemp.medicines.length;
                 return shopTemp;
             }).filter(shop => shop.medicines.length > 0);
             searchResult = loadedMarkersData;
         } else {
             loadedMarkersData = allMarkersData
         }
-        // createMarkers();
+        createMarkers();
         console.log(loadedMarkersData)
     })
 
     $("#ts-results").on('click', '.ts-result', function(e) {
         const idx  = e.currentTarget.id.split('_')[1];
-        localStorage.setItem('seletectedItem', JSON.stringify(loadedMarkersData[idx]));
+        localStorage.setItem('seletectedItem', loadedMarkersData[idx] != null ? JSON.stringify(loadedMarkersData[idx]) : '');
         window.location.href = 'detail-01.html';
     })
 
