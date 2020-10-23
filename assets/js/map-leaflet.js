@@ -1,8 +1,6 @@
 $(document).ready(function($) {
     "use strict";
 
-    console.log(window.test)
-
     var mapId = "ts-map-hero";
 
     //==================================================================================================================
@@ -17,6 +15,49 @@ $(document).ready(function($) {
     var markerCluster;
     var userLocationTurf;
     var searchResult;
+    var userLocation;
+    var userIcon = `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+<path style="fill:#FF1A4B;" d="M433.531,177.531c0,40.043-28.086,106.04-83.477,196.141
+   c-40.503,65.887-81.586,121.479-81.996,122.039L256,512l-12.057-16.289c-0.41-0.56-41.493-56.152-81.996-122.039
+   c-55.391-90.101-83.477-156.098-83.477-196.141C78.469,79.645,158.105,0,256,0S433.531,79.645,433.531,177.531z"/>
+<path style="fill:#FFDBA9;" d="M357.517,174.779c0,55.982-45.536,101.527-101.518,101.527s-101.517-45.546-101.517-101.527
+   c0-55.972,45.536-101.518,101.517-101.518S357.517,118.807,357.517,174.779z"/>
+<path style="fill:#D5243E;" d="M433.531,177.531c0,40.043-28.086,106.04-83.477,196.141
+   c-40.503,65.887-81.586,121.479-81.996,122.039L256,512V0C353.895,0,433.531,79.645,433.531,177.531z"/>
+<path style="fill:#FFC473;" d="M357.517,174.779c0,55.982-45.536,101.527-101.518,101.527V73.261
+   C311.982,73.261,357.517,118.807,357.517,174.779z"/>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+</svg>`
 
     if ($("#" + mapId).length) {
 
@@ -78,8 +119,8 @@ $(document).ready(function($) {
         //==================================================================================================================
         // LOAD DATA
         // =================================================================================================================
-        userLocation();
         loadData();
+        userLocation();
     }
 
     function populateDetailsPage() {
@@ -175,7 +216,10 @@ $(document).ready(function($) {
             console.log('Geolocation is not supported by your browser')
         } else {
             navigator.geolocation.getCurrentPosition(success => {
-               userLocationTurf = turf.point([success.coords.longitude, success.coords.latitude])
+                console.log('Gets here', success);
+               userLocationTurf = turf.point([success.coords.longitude, success.coords.latitude]);
+               userLocation = success.coords;
+               loadData();
             }, err => console.log(err))
         }
     }
@@ -222,16 +266,20 @@ $(document).ready(function($) {
                         store.distance = userLocationTurf != null ? turf.distance(userLocationTurf, storeLoc).toFixed(2) + 'KM' : 'N/A';
                         return store;
                     });
+                    console.log(allMarkersData);
                     loadedMarkersData = allMarkersData;
                 }
-
-                createMarkers(); // call function to create markers
+                
+                const clear = (parameters == null || parameters['clearCluster'] == null) ? true : false;
+                console.log('From here');
+                createMarkers(clear); // call function to create markers
             },
             error: function (e) {
                 console.log(e);
             }
         });
     }
+    
 
     $("#search-btn").on('click', function (e) {
         const searchText = $("#medicine").val();
@@ -248,7 +296,7 @@ $(document).ready(function($) {
         } else {
             loadedMarkersData = allMarkersData
         }
-        createMarkers();
+        // createMarkers();
         console.log(loadedMarkersData)
     })
 
@@ -261,11 +309,25 @@ $(document).ready(function($) {
     //==================================================================================================================
     // Create DIV with the markers data
     // =================================================================================================================
-    function createMarkers() {
-
-        markerCluster = L.markerClusterGroup({
-            showCoverageOnHover: false
-        });
+    function createMarkers(clearCluster = true) {
+        console.log('Clear: ', clearCluster);
+        if (clearCluster) {
+            markerCluster = L.markerClusterGroup({
+                showCoverageOnHover: false
+            });
+            if (userLocation) {
+                const iconUser = L.divIcon({
+                    html: userIcon,
+                    iconSize: [42, 47],
+                    iconAnchor: [0, 47]
+                });
+                console.log(map);
+                map.setView([userLocation.latitude, userLocation.longitude], mapDefaultZoom);
+                var marker = L.marker([userLocation.latitude, userLocation.longitude], {icon: iconUser});
+                markerCluster.addLayer(marker);
+                newMarkers.push(marker);
+            }
+        }
 
         for (var i = 0; i < loadedMarkersData.length; i++) {
 
@@ -480,7 +542,7 @@ $(document).ready(function($) {
             var id = visibleMarkersOnMap[i].loopNumber;
             var additionalInfoHtml = "";
 
-            if (loadedMarkersData[id]["additional_info"]) {
+            if (loadedMarkersData && loadedMarkersData[id] && loadedMarkersData[id]["additional_info"]) {
                 for (var a = 0; a < loadedMarkersData[id]["additional_info"].length; a++) {
                     additionalInfoHtml +=
                         '<dl>' +
@@ -489,29 +551,30 @@ $(document).ready(function($) {
                         '</dl>';
                 }
             }
-
-            resultsHtml.push(
-                '<div class="ts-result-link" data-ts-id="' + loadedMarkersData[id]["id"] + '" data-ts-ln="' + newMarkers[id].loopNumber + '"' + 'id="result_' + i +'">' +
-                    '<span class="ts-center-marker"><img src="assets/img/result-center.svg"></span>' +
-                    '<a href="#" class="card ts-item ts-card ts-result" ' + 'id="result_' + i +'">' +
-                        ( ( loadedMarkersData[i]["ribbon"] !== undefined ) ? '<div class="ts-ribbon">' + loadedMarkersData[i]["ribbon"] + '</div>' : "" ) +
-                        ( ( loadedMarkersData[i]["ribbon_corner"] !== undefined ) ? '<div class="ts-ribbon-corner"><span>' + loadedMarkersData[i]["ribbon_corner"] + '</span></div>' : "" ) +
-                        '<div href="#" class="card-img ts-item__image" style="background-image: url(' + loadedMarkersData[id]["marker_image"] + ')"></div>' +
-                        '<div class="card-body">' +
-                            '<div class="ts-item__info-badge">' + loadedMarkersData[id]["province"] + '</div>' +
-                            '<figure class="ts-item__info">' +
-                                '<h4>' + loadedMarkersData[id]["name"] + '</h4>' +
-                                '<aside>' +
-                                '<i class="fa fa-map-marker mr-2"></i>' + loadedMarkersData[id]["address"] + '</aside>' +
-                            '</figure>' +
-                            additionalInfoHTML({display: displayAdditionalInfo, i: i}) +
-                        '</div>' +
-                        '<div class="card-footer">' +
-                            '<span class="ts-btn-arrow">Detail</span>' +
-                        '</div>' +
-                    '</a>' +
-                '</div>'
-            );
+            if (loadedMarkersData && loadedMarkersData[id]) {
+                resultsHtml.push(
+                    '<div class="ts-result-link" data-ts-id="' + loadedMarkersData[id]["id"] + '" data-ts-ln="' + newMarkers[id].loopNumber + '"' + 'id="result_' + i +'">' +
+                        '<span class="ts-center-marker"><img src="assets/img/result-center.svg"></span>' +
+                        '<a href="#" class="card ts-item ts-card ts-result" ' + 'id="result_' + i +'">' +
+                            ( ( loadedMarkersData[i]["ribbon"] !== undefined ) ? '<div class="ts-ribbon">' + loadedMarkersData[i]["ribbon"] + '</div>' : "" ) +
+                            ( ( loadedMarkersData[i]["ribbon_corner"] !== undefined ) ? '<div class="ts-ribbon-corner"><span>' + loadedMarkersData[i]["ribbon_corner"] + '</span></div>' : "" ) +
+                            '<div href="#" class="card-img ts-item__image" style="background-image: url(' + loadedMarkersData[id]["marker_image"] + ')"></div>' +
+                            '<div class="card-body">' +
+                                '<div class="ts-item__info-badge">' + loadedMarkersData[id]["province"] + '</div>' +
+                                '<figure class="ts-item__info">' +
+                                    '<h4>' + loadedMarkersData[id]["name"] + '</h4>' +
+                                    '<aside>' +
+                                    '<i class="fa fa-map-marker mr-2"></i>' + loadedMarkersData[id]["address"] + '</aside>' +
+                                '</figure>' +
+                                additionalInfoHTML({display: displayAdditionalInfo, i: i}) +
+                            '</div>' +
+                            '<div class="card-footer">' +
+                                '<span class="ts-btn-arrow">Detail</span>' +
+                            '</div>' +
+                        '</a>' +
+                    '</div>'
+                );
+            }
         }
 
 
@@ -566,6 +629,7 @@ $(document).ready(function($) {
     var timer;
     $(document).on({
         mouseenter: function () {
+            console.log('Working');
             var id = $(this).parent().attr("data-ts-id");
             timer = setTimeout(function(){
                 $(".ts-marker").parent().addClass("ts-marker-hide");
