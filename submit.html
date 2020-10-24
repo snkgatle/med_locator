@@ -75,7 +75,7 @@
 
                 <!--Brand Logo-->
                 <a class="navbar-brand" href="index.html">
-                    <img src="assets/img/logo.png" alt="">
+                    <img src="assets/img/logo.png" alt="" id="logo">
                 </a>
 
                 <!--Responsive Collapse Button-->
@@ -399,6 +399,14 @@
 <script src="assets/js/jQuery.MultiFile.min.js"></script>
 <script src="assets/js/custom.js"></script>
 <script src="assets/js/map-leaflet.js"></script>
+<script>
+const map = L.map("#ts-map-simple", {
+    zoomControl: false,
+    scrollWheelZoom: 1
+});
+const test = sessionStorage.getItem("location");
+map.setView([test.latitude, test.longitude], mapDefaultZoom);
+</script>
 
 </body>
 </html>
