@@ -15,7 +15,7 @@ $(document).ready(function($) {
     var markerCluster;
     var userLocationTurf;
     var searchResult;
-    var userLocation;
+    var userLocationUser;
     var userIcon = `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
     viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
 <path style="fill:#FF1A4B;" d="M433.531,177.531c0,40.043-28.086,106.04-83.477,196.141
@@ -121,6 +121,9 @@ $(document).ready(function($) {
         // =================================================================================================================
         loadData();
         userLocation();
+        $("#disclaimer").modal({
+            show: true,
+        })
     }
 
     function populateDetailsPage() {
@@ -194,6 +197,10 @@ $(document).ready(function($) {
         }
         window.location.reload();
     })
+    
+    $("#cartItems").on("click", function(e) {
+        
+    })
 
     function addToCart(pharmacy, medicineId) {
         let cart = localStorage.getItem('cart')
@@ -225,7 +232,7 @@ $(document).ready(function($) {
             navigator.geolocation.getCurrentPosition(success => {
                 console.log('Gets here', success);
                userLocationTurf = turf.point([success.coords.longitude, success.coords.latitude]);
-               userLocation = success.coords;
+               userLocationUser = success.coords;
                loadData();
             }, err => console.log(err))
         }
@@ -310,6 +317,7 @@ $(document).ready(function($) {
 
     $("#ts-results").on('click', '.ts-result', function(e) {
         const idx  = e.currentTarget.id.split('_')[1];
+        sessionStorage.setItem("location", `{'lat': ${userLocationUser.latitude}, 'lng': ${userLocationUser.longitude}}`);
         localStorage.setItem('seletectedItem', loadedMarkersData[idx] != null ? JSON.stringify(loadedMarkersData[idx]) : '');
         window.location.href = 'detail-01.html';
     })
@@ -323,15 +331,15 @@ $(document).ready(function($) {
             markerCluster = L.markerClusterGroup({
                 showCoverageOnHover: false
             });
-            if (userLocation) {
+            if (userLocationUser) {
                 const iconUser = L.divIcon({
                     html: userIcon,
                     iconSize: [42, 47],
                     iconAnchor: [0, 47]
                 });
                 console.log(map);
-                map.setView([userLocation.latitude, userLocation.longitude], mapDefaultZoom);
-                var marker = L.marker([userLocation.latitude, userLocation.longitude], {icon: iconUser});
+                map.setView([userLocationUser.latitude, userLocationUser.longitude], mapDefaultZoom);
+                var marker = L.marker([userLocationUser.latitude, userLocationUser.longitude], {icon: iconUser});
                 markerCluster.addLayer(marker);
                 newMarkers.push(marker);
             }
