@@ -289,13 +289,14 @@ $(document).ready(function($) {
         query.save().then(
         (result) => {
             console.log(result)
+            Parse.Cloud.run('hello').then(res => console.log(res)).catch(err => console.log(err))
             localStorage.removeItem('cart');
             emailjs.send("service_uicxnjs","template_ow1717c",{
                 from_name: "Meds Locator",
                 to_name: fnames,
                 address: `${address}, ${city}, ${province} ${postal}`,
                 reply_to: "info@medslocator.co.za",
-                pharmacy_email: "stephans.kgatle@gmail.com",
+                pharmacy_email: "kabelomoeketsi@ymail.com",
                 email: email,
             });
                 
