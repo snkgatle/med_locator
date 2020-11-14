@@ -281,6 +281,7 @@
                                     <div class="col-sm-6">
                                         <div id="ts-map-simple" class="ts-map ts-shadow__sm h-100"
                                              data-ts-map-leaflet-provider="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}{r}.png"
+                                             data-ts-map-mapbox-access-token="pk.eyJ1Ijoia2FiZWxvIiwiYSI6ImNrY3V5eGtkNjA5OTMzMG8xbXFpdDIzNHoifQ.Y1duf95N56uwYeFXeBaqUg"
                                              data-ts-map-zoom="13"
                                              data-ts-map-center-latitude="-26.195246"
                                              data-ts-map-center-longitude="28.034088"
@@ -419,15 +420,23 @@
 <script src="assets/bootstrap/js/bootstrap.min.js"></script>
 <script src="assets/js/leaflet.js"></script>
 <script src="assets/js/jQuery.MultiFile.min.js"></script>
+<script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="assets/js/custom.js"></script>
 <script src="assets/js/map-leaflet.js"></script>
 <script>
-const map = L.map("#ts-map-simple", {
-    zoomControl: false,
-    scrollWheelZoom: 1
-});
-const test = sessionStorage.getItem("location");
-map.setView([test.latitude, test.longitude], mapDefaultZoom);
+    $(document).ready(function($) {
+        // if (map == null) {
+        //     var map = L.map("ts-map-simple", {
+        //         zoomControl: false,
+        //         scrollWheelZoom: 1
+        //     });
+        // }
+        // const test = sessionStorage.getItem("location");
+        // if (map != null) {
+        //     map.setView([test.latitude, test.longitude], mapDefaultZoom);
+        // }
+    })
 </script>
 
 </body>

@@ -78,6 +78,7 @@ $(document).ready(function($) {
         var zoomPosition = mapElement.attr("data-ts-map-zoom-position");
         var mapBoxAccessToken = mapElement.attr("data-ts-map-mapbox-access-token");
         var mapBoxId = mapElement.attr("data-ts-map-mapbox-id");
+        var userAddress = [];
 
         if (mapElement.attr("data-ts-display-additional-info")) {
             var displayAdditionalInfoTemp = mapElement.attr("data-ts-display-additional-info").split(";");
@@ -130,6 +131,7 @@ $(document).ready(function($) {
         if (localStorage.getItem('seletectedItem')) {
             console.log(localStorage.getItem('seletectedItem'))
             var info = JSON.parse(localStorage.getItem('seletectedItem'));
+            userLocation();
         }
         const pathname = window.location.pathname;
         if (info && pathname == '/detail-01.html') {
@@ -230,12 +232,28 @@ $(document).ready(function($) {
             console.log('Geolocation is not supported by your browser')
         } else {
             navigator.geolocation.getCurrentPosition(success => {
-                console.log('Gets here', success);
                userLocationTurf = turf.point([success.coords.longitude, success.coords.latitude]);
                userLocationUser = success.coords;
+               console.log('User Location: ', userLocationUser)
+               getAddress(userLocationUser)
                loadData();
             }, err => console.log(err))
         }
+    }
+    
+    function getAddress(location) {
+        axios.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/${location.longitude},${location.latitude}.json?tpe=poi&access_token=pk.eyJ1Ijoia2FiZWxvIiwiYSI6ImNrY3V5eGtkNjA5OTMzMG8xbXFpdDIzNHoifQ.Y1duf95N56uwYeFXeBaqUg`)
+        .then(loc => {
+            if(loc.data) {
+                userAddress = loc.data.features[0].place_name.split(',');
+                const postalCode = loc.data.features[2].place_name.split(',');
+                console.log(loc.data.features)
+                $("#address").val(userAddress[0]);
+                $("#city").val(userAddress[1]);
+                $("#province").val(postalCode[2]);
+                $("#postal").val(postalCode[0]);
+            }
+        }).catch(err => console.log(err));
     }
 
     $("#order").on("click", function(e) {
