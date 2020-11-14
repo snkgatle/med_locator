@@ -150,7 +150,7 @@
 
                     <div class="offset-lg-1 col-lg-10">
 
-                        <form id="form-submit" class="ts-form">
+                        <form id="form-submit" class="ts-form" onsubmit="return false" enctype="multipart/form-data">
 
                             <!--BASIC INFORMATION
                                 =====================================================================================-->
@@ -163,54 +163,17 @@
                                 <div class="row">
 
                                     <!--Title-->
-                                    <div class="col-sm-12 col-md-4">
+                                    <div class="col-sm-12 col-md-7">
                                         <div class="form-group">
-                                            <label for="title">Title</label>
+                                            <label for="title">Full Names</label>
                                             <input type="text" class="form-control" id="title" name="title" required>
                                         </div>
                                     </div>
   
-                                    <div class="col-sm-12 col-md-4">
+                                    <div class="col-sm-12 col-md-5">
                                         <div class="input-group">
-                                            <label for="surname">Surname</label>
-                                            <input type="text" class="form-control border-right-0" id="surname">
-                                            <div class="input-group-append">
-                                                <span class="input-group-text bg-white border-left-0">$</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-sm-12 col-md-4">
-                                        <div class="form-group">
-                                            <label for="proof_med">Proof of Medical Aid</label>
-                                            <input type="file" class="form-control" id="proof_med" name="proof_med" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-sm-12 col-md-4">
-
-                                        <div class="row">
-
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <label for="no">Medical Aid No.</label>
-                                                    <input type="number" class="form-control" id="no" name="no" min="0" required>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                        <!--end row-->
-
-                                    </div>
-                                    <!--end col-md-4-->
-
-                                    <div class="col-sm-6 col-md-4">
-                                        <div class="form-group">
-                                            <label for="type">Main Member</label>
-                                            <select class="custom-select" id="type" name="type">
-                                                <option value="0">Yes</option>
-                                                <option value="1">No</option>
-                                            </select>
+                                            <label for="email">Email</label>
+                                            <input type="email" class="form-control border-right-0" id="email" required>
                                         </div>
                                     </div>
 
@@ -248,8 +211,8 @@
                                         <!--Address-->
                                         <div class="input-group">
                                             <label for="address">Address</label>
-                                            <input type="text" class="form-control border-right-0" id="address">
-                                            <div class="input-group-append" data-toggle="tooltip" data-placement="top" title="Find My Location">
+                                            <input type="text" class="form-control border-right-0" id="address" required>
+                                            <div class="input-group-append" data-toggle="tooltip" data-placement="top">
                                                 <a href="#" class="input-group-text bg-white border-left-0 ">
                                                     <i class="fa fa-map-marker ts-text-color-primary"></i>
                                                 </a>
@@ -423,6 +386,20 @@
 <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="assets/js/custom.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/parse/2.18.0/parse.min.js"></script>
+<script>
+Parse.serverURL = 'https://parseapi.back4app.com'; // This is your Server URL
+Parse.initialize(
+  'o0aILsboO1nRbcqSpbAlJw3HSeE176wSLMNZjOen', // This is your Application ID
+  'vrJ32C4wkIKRWoO6X3SsIzaS7F05BaoXPNWVkArG' // This is your Javascript key
+);
+</script>
+<script type="text/javascript"src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
+<script type="text/javascript">
+(function() {
+emailjs.init("user_M9Mf7wd0agKrueNylxoN6");
+})();
+</script>
 <script src="assets/js/map-leaflet.js"></script>
 <script>
     $(document).ready(function($) {

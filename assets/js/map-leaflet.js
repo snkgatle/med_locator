@@ -255,27 +255,75 @@ $(document).ready(function($) {
             }
         }).catch(err => console.log(err));
     }
+    var base64DecodedFile = '';
+    $(":file").on('change', function(e) {
+        const fileReader = new FileReader()
+        fileReader.readAsBinaryString(this.files['0']);
+        fileReader.onload = function() {
+            console.log("Reader: ", fileReader.result);
+            base64DecodedFile = btoa(fileReader.result)
+        }
+        fileReader.onerror = function() {
+            console.log("Error Reading the file");
+        }
+    })
 
     $("#order").on("click", function(e) {
-        $("ts-main").html(`
-        <section id="submitted" class="ts-block">
-        <div class="container">
-            <div class="row">
+        $("#order").text('Sending Info...');
+        const fnames = $("#title").val();
+        const email = $("#email").val();
+        const presciption = base64DecodedFile;
+        const address = $("#address").val();
+        const city = $("#city").val();
+        const province = $("#province").val();
+        const postal = $("#postal").val();
+        const medicines = localStorage.getItem('cart') != null ? JSON.parse(localStorage.getItem('cart')) : [];
+        const med_reserve = Parse.Object.extend('med_reserve');
+        const query = new med_reserve();
 
-                <div class="offset-2 col-md-8 text-center">
+        query.set('full_name', fnames);
+        query.set('address', `${address}, ${city}, ${province} ${postal}`);
+        query.set('medicines', medicines);
+        query.set('prescription', new Parse.File(fnames.toLowerCase().split(' ').join('_') + ".pdf", { base64: presciption }));
 
-                    <i class="far fa-check-circle ts-text-color-primary display-4 mb-2"></i>
-                    <h1 class="ts-text-color-primary">Thank You!</h1>
-                    <h4 class="ts-text-color-light">Your Order was submitted Successfully</h4>
-                    <a href="index.html" class="btn btn-secondary">Back to Home</a>
-                    <hr>
-
+        query.save().then(
+        (result) => {
+            console.log(result)
+            localStorage.removeItem('cart');
+            emailjs.send("service_uicxnjs","template_ow1717c",{
+                from_name: "Meds Locator",
+                to_name: fnames,
+                address: `${address}, ${city}, ${province} ${postal}`,
+                reply_to: "info@medslocator.co.za",
+                pharmacy_email: "stephans.kgatle@gmail.com",
+                email: email,
+            });
+                
+                $("#ts-main").html(`
+                <section id="submitted" class="ts-block">
+                <div class="container">
+                    <div class="row">
+        
+                        <div class="offset-2 col-md-8 text-center">
+        
+                            <i class="far fa-check-circle ts-text-color-primary display-4 mb-2"></i>
+                            <h1 class="ts-text-color-primary">Thank You!</h1>
+                            <h4 class="ts-text-color-light">Your Order was submitted Successfully</h4>
+                            <a href="index.html" class="btn btn-secondary">Back to Home</a>
+                            <hr>
+        
+                        </div>
+        
+                    </div>
                 </div>
-
-            </div>
-        </div>
-    </section>
-        `)
+            </section>
+                `)
+        },
+        (error) => {
+            if (typeof document !== 'undefined') document.write(`Error while creating med_reserve: ${JSON.stringify(error)}`);
+            console.error('Error while creating med_reserve: ', error);
+        }
+        );
     })
 
     function loadData(parameters) {
