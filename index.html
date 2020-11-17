@@ -154,13 +154,6 @@
                                 <input type="text" class="form-control" id="medicine" name="medicine" placeholder="Medicine">
                             </div>
 
-                            <!--Status-->
-                            <select class="custom-select my-2" id="status" name="status">
-                                <option value="">Status</option>
-                                <option value="1">Stock</option>
-                                <option value="2">No Stock</option>
-                            </select>
-
                             <!--Max Price-->
                             <select class="custom-select my-2" id="distance" name="distance">
                                 <option value="">Distance</option>
@@ -220,7 +213,7 @@
 
 </div>
 
-<div class="modal fade" id="disclaimer" tabindex="-1" role="dialog" aria-labelledby="disclaimer" aria-hidden="true">
+<div class="modal fade" id="disclaimer" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="disclaimer" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -277,6 +270,7 @@
             </ul>
         </div>
         <div class="modal-footer">
+            <button type="button" class="btn btn-primary">Reject</button>
           <button type="button" class="btn btn-primary" data-dismiss="modal">Accept</button>
         </div>
       </div>
