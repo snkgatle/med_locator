@@ -408,10 +408,14 @@ $(document).ready(function($) {
     })
 
     $("#ts-results").on('click', '.ts-result', function(e) {
-        const idx  = e.currentTarget.id.split('_')[1];
-        sessionStorage.setItem("location", `{'lat': ${userLocationUser.latitude}, 'lng': ${userLocationUser.longitude}}`);
-        localStorage.setItem('seletectedItem', loadedMarkersData[idx] != null ? JSON.stringify(loadedMarkersData[idx]) : '');
-        window.location.href = 'detail-01.html';
+        if (e.target.id !== 'route') {
+            const idx  = e.currentTarget.id.split('_')[1];
+            sessionStorage.setItem("location", `{'lat': ${userLocationUser.latitude}, 'lng': ${userLocationUser.longitude}}`);
+            localStorage.setItem('seletectedItem', loadedMarkersData[idx] != null ? JSON.stringify(loadedMarkersData[idx]) : '');
+            window.location.href = 'detail-01.html';
+        } else {
+            window.location.href = 'https://www.google.com/maps/dir/?api=1';
+        }
     })
 
     //==================================================================================================================
@@ -619,16 +623,22 @@ $(document).ready(function($) {
                     '</dl>';
             }
         }
-        if (additionalInfoHtml) {
-            return '<div class="ts-description-lists">' + additionalInfoHtml + '</div>';
-        }
-        else {
-            return "";
-        }
-    }
+        additionalInfoHtml +=
+                    `<dl>
+                        <dt>Direction</dt>
+                        <dd><button id="route" onclick="${test()}" style="padding: 5px 10px;border-radius: 50%;" class="btn btn-info route">></button></dd>
+                    </dl>`;
+                    if (additionalInfoHtml) {
+                        return '<div class="ts-description-lists">' + additionalInfoHtml + '</div>';
+                    }
+                    else {
+                        return "";
+                    }
+                }
 
     function test() {
         console.log('CLicked')
+    
     }
 
     //==================================================================================================================
@@ -768,6 +778,18 @@ $(document).ready(function($) {
     function formatPrice(price) {
         console.log(price, Number(price).toLocaleString(locale, {style: 'currency', currency: currency}).replace(/\D\d\d$/, ''));
         return Number(price).toLocaleString(locale, {style: 'currency', currency: currency}).replace(/\D\d\d$/, '');
+    }
+    
+    function showDirections(origin, destination) {
+        var directions = L.mapbox.directions({
+            profile: 'mapbox.driving' 
+        });
+        directions.setOrigin(L.latLng(origin.lat, origin.lng)); 
+        directions.setDestination(L.latLng(destination.lat, destination.lng));   
+        directions.query();
+        var directionsLayer = L.mapbox.directions.layer(directions).addTo(map); 
+        var directionsRoutesControl = L.mapbox.directions.routesControl('routes', directions)
+            .addTo(map);
     }
 
 
