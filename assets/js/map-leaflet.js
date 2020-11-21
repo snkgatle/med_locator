@@ -15,6 +15,9 @@ $(document).ready(function($) {
     var markerCluster;
     var userLocationTurf;
     var searchResult;
+    var centerMarkerLatLng = null;
+    var itemWithinMap = false;
+    var hasSearched = false;
     var userLocationUser;
     var userIcon = `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
     viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
@@ -360,6 +363,17 @@ $(document).ready(function($) {
             }
         });
     }
+
+    function featurePoint(lat, lng) {
+        return {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "type": "Point",
+              "coordinates": [lat, lng]
+            }
+          };
+    }
     
 
     $("#search-btn").on('click', function (e) {
@@ -374,10 +388,21 @@ $(document).ready(function($) {
                 shopTemp.nomeds = shopTemp.medicines.length;
                 return shopTemp;
             }).filter(shop => shop.medicines.length > 0);
+            if (!!distance) {
+                loadedMarkersData = loadedMarkersData.filter(markerInfo => {
+                    const distance2 = turf.distance(
+                        featurePoint(userLocationUser.latitude, userLocationUser.longitude),
+                        featurePoint(markerInfo.latitude, markerInfo.longitude),
+                    );
+                    return distance < (distance2 / 1000);
+                })
+
+            }
             searchResult = loadedMarkersData;
         } else {
             loadedMarkersData = allMarkersData
         }
+        hasSearched = true;
         createMarkers();
         console.log(loadedMarkersData)
     })
@@ -393,7 +418,6 @@ $(document).ready(function($) {
     // Create DIV with the markers data
     // =================================================================================================================
     function createMarkers(clearCluster = true) {
-        console.log('Clear: ', clearCluster);
         if (clearCluster) {
             markerCluster = L.markerClusterGroup({
                 showCoverageOnHover: false
@@ -428,6 +452,10 @@ $(document).ready(function($) {
 
             placeLeafletMarker({"i": i, "markerContent": markerContent, "method": "latitudeLongitude"});
 
+        }
+        
+        if (!itemWithinMap) {
+            map.setView(centerMarkerLatLng, mapDefaultZoom);
         }
 
         // After the markers are created, do the rest
@@ -468,6 +496,13 @@ $(document).ready(function($) {
         var marker = L.marker([loadedMarkersData[i]["latitude"], loadedMarkersData[i]["longitude"]], {
             icon: markerIcon
         });
+        
+        const withinView = map.getBounds().contains(marker.getLatLng());
+        if (withinView) {
+            itemWithinMap = withinView;
+        } else {
+            centerMarkerLatLng = marker.getLatLng();
+        }
 
         marker.loopNumber = i;
 
@@ -660,8 +695,13 @@ $(document).ready(function($) {
             }
         }
 
-
-        $(".ts-results-wrapper").html(resultsHtml);
+        if (resultsHtml.length === 0 && hasSearched) {
+            $(".ts-results-wrapper").html(`<p class="no_res">No Medicines found</p>`);
+            // console.log(userLocationUser)
+            // map.setView([userLocationUser.latitude, userLocationUser.longitude], mapDefaultZoom);
+        } else {
+            $(".ts-results-wrapper").html(resultsHtml);
+        }
 
         var $results = $("#ts-results").find(".ts-sly-frame");
         if ($results.hasClass("ts-loaded")) {
